@@ -1,4 +1,4 @@
-#!/usr/local/bin/perl
+#!/usr/bin/perl
 
 use Set::Files;
 
@@ -29,14 +29,25 @@ $q = new Set::Files("path"          => ["dir3"],
                     "comment"       => "!.*"
                    );
 
-&test("a",               join(" ",$q->list_sets));
-&test("a",               join(" ",$q->list_sets("type1")));
-&test("a ab abc ac",     join(" ",$q->members("a")));
-&test("1",               $q->is_member("a","ab"));
-&test("0",               $q->is_member("a","c"));
-&test("type1 type2",     join(" ",$q->list_types));
-&test("type1 type2",     join(" ",$q->list_types("a")));
-&test("dir3",            join(" ",$q->dir("a")));
-&test("1",               join(" ",$q->opts("a","a1")));
-&test("vala2",           join(" ",$q->opts("a","a2")));
+test("a",               join(" ",$q->list_sets));
+test("a",               join(" ",$q->list_sets("type1")));
+test("a ab abc ac",     join(" ",$q->members("a")));
+test("1",               $q->is_member("a","ab"));
+test("0",               $q->is_member("a","c"));
+test("type1 type2",     join(" ",$q->list_types));
+test("type1 type2",     join(" ",$q->list_types("a")));
+test("dir3",            join(" ",$q->dir("a")));
+test("1",               join(" ",$q->opts("a","a1")));
+test("vala2",           join(" ",$q->opts("a","a2")));
+
+# Local Variables:
+# mode: cperl
+# indent-tabs-mode: nil
+# cperl-indent-level: 3
+# cperl-continued-statement-offset: 2
+# cperl-continued-brace-offset: 0
+# cperl-brace-offset: 0
+# cperl-brace-imaginary-offset: 0
+# cperl-label-offset: -2
+# End:
 

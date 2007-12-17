@@ -53,7 +53,7 @@ Set::Files - routines to work with files, each definining a single set
 
   $obj->cache;
 
-  $num     = $obj->add(SET, ELE1,ELE2,...);
+  $num     = $obj->add   (SET, FORCE, COMMIT, ELE1,ELE2,...);
   $num     = $obj->remove(SET, ELE1,ELE2,...);
 
   $obj->commit(SET1,SET2,...);
@@ -187,8 +187,11 @@ The following methods are available:
 
 # Version 1.00  sbeck  2002-04-01
 #    Initial release
+#
+# Version 1.01  sbeck  2007-12-17
+#    Cleaned up some code.
 
-$VERSION = "1.00";
+$VERSION = "1.01";
 
 =pod
 
@@ -228,7 +231,7 @@ my @Cache = qw(type owner dir opts ele);
 sub new {
   my($class,%opts) = @_;
 
-  my $self = &Init(%opts);
+  my $self = Init(%opts);
   bless $self, $class;
 
   return $self;
@@ -589,7 +592,7 @@ sub add {
   }
   return 0  if (! @add);
 
-  &commit($self,$set)  if ($commit);
+  commit($self,$set)  if ($commit);
   return $#add+1;
 }
 
@@ -625,7 +628,7 @@ sub remove {
   }
   return 0  if (! @rem);
 
-  &commit($self,$set)  if ($commit);
+  commit($self,$set)  if ($commit);
   return $#rem+1;
 }
 
@@ -1143,10 +1146,10 @@ sub Init {
           croak "ERROR: invalid set to read: $set\n";
         }
 
-        $self{"set"}{$set} = &ReadSet($set,$dir{$set},\@types,\@def_types,
-                                      $comment,$tagchars,
-                                      $valid_ele,$valid_ele_re,$valid_ele_nre,
-                                      $invalid_quiet);
+        $self{"set"}{$set} = ReadSet($set,$dir{$set},\@types,\@def_types,
+                                     $comment,$tagchars,
+                                     $valid_ele,$valid_ele_re,$valid_ele_nre,
+                                     $invalid_quiet);
         push (@set,keys %{ $self{"set"}{$set}{"incl"} })
           if (exists $self{"set"}{$set}{"incl"});
         push (@set,keys %{ $self{"set"}{$set}{"excl"} })
@@ -1158,10 +1161,10 @@ sub Init {
 
     if ($read eq "files") {
       foreach my $set (keys %dir) {
-        $self{"set"}{$set} = &ReadSet($set,$dir{$set},\@types,\@def_types,
-                                      $comment,$tagchars,
-                                      $valid_ele,$valid_ele_re,$valid_ele_nre,
-                                      $invalid_quiet);
+        $self{"set"}{$set} = ReadSet($set,$dir{$set},\@types,\@def_types,
+                                     $comment,$tagchars,
+                                     $valid_ele,$valid_ele_re,$valid_ele_nre,
+                                     $invalid_quiet);
       }
     }
 
@@ -1192,8 +1195,8 @@ sub Init {
     }
 
     while (1) {
-      my $flag1 = &ExpandInclude($self{"set"});
-      my $flag2 = &ExpandExclude($self{"set"});
+      my $flag1 = ExpandInclude($self{"set"});
+      my $flag2 = ExpandExclude($self{"set"});
       last  if (! $flag1  &&  ! $flag2);
     }
 
@@ -1230,9 +1233,9 @@ sub ReadSet {
   }
   my $uid = ( stat("$dir/$set") )[4];
   $set{"owner"} = $uid;
-  &ReadSetFile($set,$in,\%set,$types,$def_types,$comment,
-               $tagchars,$valid_ele,$valid_ele_re,$valid_ele_nre,
-               $invalid_quiet);
+  ReadSetFile($set,$in,\%set,$types,$def_types,$comment,
+              $tagchars,$valid_ele,$valid_ele_re,$valid_ele_nre,
+              $invalid_quiet);
   $in->close;
   return \%set;
 }
@@ -1482,7 +1485,7 @@ if it exists, read from the files otherwise.  If no B<cache> option
 was used, the default is to read from the files.  When data is read in
 from the cache, the B<commit> and B<cache> methods are disabled.
 
-If the B<file> option is used, it reads from a single set from a single
+If the B<file> option is used, it reads a single set from a single
 file along with all dependancy sets (i.e. sets that are included or
 excluded via. the appropriate tags).  This allows someone to make changes
 to a single set file that they own even if permissions are set so that
@@ -1772,6 +1775,12 @@ Sullivan Beck (sbeck@cpan.org)
 
 1;
 # Local Variables:
+# mode: cperl
 # indent-tabs-mode: nil
+# cperl-indent-level: 3
+# cperl-continued-statement-offset: 2
+# cperl-continued-brace-offset: 0
+# cperl-brace-offset: 0
+# cperl-brace-imaginary-offset: 0
+# cperl-label-offset: -2
 # End:
-

@@ -1,4 +1,4 @@
-#!/usr/local/bin/perl
+#!/usr/bin/perl
 
 use Set::Files;
 
@@ -27,14 +27,14 @@ $q = new Set::Files("path"          => "dir4",
                     "valid_ele"     => '^(a|b)'
                    );
 
-&test("a b",             join(" ",$q->members("a1")));
+test("a b",             join(" ",$q->members("a1")));
 
 $q = new Set::Files("path"          => "dir4",
                     "invalid_quiet" => 1,
                     "valid_ele"     => '!(a|b)'
                    );
 
-&test("c d",             join(" ",$q->members("a1")));
+test("c d",             join(" ",$q->members("a1")));
 
 sub valid_ele {
   my($set,$ele) = @_;
@@ -47,5 +47,16 @@ $q = new Set::Files("path"          => "dir4",
                     "valid_ele"     => \&valid_ele
                    );
 
-&test("a d",             join(" ",$q->members("a1")));
+test("a d",             join(" ",$q->members("a1")));
+
+# Local Variables:
+# mode: cperl
+# indent-tabs-mode: nil
+# cperl-indent-level: 3
+# cperl-continued-statement-offset: 2
+# cperl-continued-brace-offset: 0
+# cperl-brace-offset: 0
+# cperl-brace-imaginary-offset: 0
+# cperl-label-offset: -2
+# End:
 

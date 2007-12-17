@@ -1,4 +1,4 @@
-#!/usr/local/bin/perl
+#!/usr/bin/perl
 
 use Set::Files;
 
@@ -27,28 +27,28 @@ $q = new Set::Files("path"          => "dir4",
                     "valid_file"    => '^a'
                    );
 
-&test("a1 a2",           join(" ",$q->list_sets));
+test("a1 a2",           join(" ",$q->list_sets));
 
 $q = new Set::Files("path"          => "dir4",
                     "invalid_quiet" => 1,
                     "valid_file"    => '2$'
                    );
 
-&test("a2 b2",           join(" ",$q->list_sets));
+test("a2 b2",           join(" ",$q->list_sets));
 
 $q = new Set::Files("path"          => "dir4",
                     "invalid_quiet" => 1,
                     "valid_file"    => '!^a'
                    );
 
-&test("b1 b2",           join(" ",$q->list_sets));
+test("b1 b2",           join(" ",$q->list_sets));
 
 $q = new Set::Files("path"          => "dir4",
                     "invalid_quiet" => 1,
                     "valid_file"    => '!2$'
                    );
 
-&test("a1 b1",           join(" ",$q->list_sets));
+test("a1 b1",           join(" ",$q->list_sets));
 
 sub valid_file {
   my($dir,$file) = @_;
@@ -61,5 +61,16 @@ $q = new Set::Files("path"          => "dir4",
                     "valid_file"    => \&valid_file
                    );
 
-&test("a1 b2",           join(" ",$q->list_sets));
+test("a1 b2",           join(" ",$q->list_sets));
+
+# Local Variables:
+# mode: cperl
+# indent-tabs-mode: nil
+# cperl-indent-level: 3
+# cperl-continued-statement-offset: 2
+# cperl-continued-brace-offset: 0
+# cperl-brace-offset: 0
+# cperl-brace-imaginary-offset: 0
+# cperl-label-offset: -2
+# End:
 

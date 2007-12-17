@@ -28,7 +28,7 @@ SYNOPSIS
 
       $obj->cache;
 
-      $num     = $obj->add(SET, ELE1,ELE2,...);
+      $num     = $obj->add   (SET, FORCE, COMMIT, ELE1,ELE2,...);
       $num     = $obj->remove(SET, ELE1,ELE2,...);
 
       $obj->commit(SET1,SET2,...);
@@ -315,8 +315,8 @@ INIT OPTIONS
         used, the default is to read from the files. When data is read in
         from the cache, the commit and cache methods are disabled.
 
-        If the file option is used, it reads from a single set from a single
-        file along with all dependancy sets (i.e. sets that are included or
+        If the file option is used, it reads a single set from a single file
+        along with all dependancy sets (i.e. sets that are included or
         excluded via. the appropriate tags). This allows someone to make
         changes to a single set file that they own even if permissions are
         set so that they cannot read other set files. The commit method is

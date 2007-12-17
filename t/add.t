@@ -1,4 +1,4 @@
-#!/usr/local/bin/perl
+#!/usr/bin/perl
 
 use Set::Files;
 
@@ -24,12 +24,16 @@ sub test {
   }
   $itest++;
 }
+
 sub test2 {
   my($set,$num,$q)=@_;
   my $dir = $q->dir($set);
+
+  $clean{"$dir/.set_files.diff.$set.$num"} = 1;
+
   my $diff = "$dir/.set_files.diff.$set.$num";
   system("diff $dir/$set.$num.out $dir/$set > $diff");
-  if (-z $diff) {
+  if (-z "$diff") {
     print "ok $itest\n";
   } else {
     print "Diff    : $set,$num\n";
@@ -37,7 +41,9 @@ sub test2 {
   }
   $itest++;
 }
+
 sub init {
+
   $in->open("dir2a/a.orig");
   $out->open("> dir2a/a");
   @in = <$in>;
@@ -47,6 +53,10 @@ sub init {
   $in->close;
   $out->close;
 
+  $clean{"dir2a/a"} = 1;
+  $clean{"dir2a/.set_files.a"} = 1;
+  $clean{"dir2a/.set_files.a.old"} = 1;
+
   $q = new Set::Files("path"          => ["dir2a","dir2b"],
                       "types"         => ["type1","type2"],
                       "invalid_quiet" => 1,
@@ -55,46 +65,66 @@ sub init {
                      );
   return $q;
 }
+sub term {
+  unlink "dir2a/a";
+}
 
-$q = &init();
+%clean = ();
+
+$q = init();
 $q->add("a",0,1, "b","y","z");
-&test("a ab abc b y z",  join(" ",$q->members("a")));
-&test2("a",1,$q);
+test("a ab abc b y z",  join(" ",$q->members("a")));
+test2("a",1,$q);
 
-$q = &init();
+$q = init();
 $q->add("a",1,1, "b","y","z");
-&test("a ab abc b y z",  join(" ",$q->members("a")));
-&test2("a",2,$q);
+test("a ab abc b y z",  join(" ",$q->members("a")));
+test2("a",2,$q);
 
-$q = &init();
+$q = init();
 $q->add("a",0,1, "ac","b","y","z");
-&test("a ab abc ac b y z",  join(" ",$q->members("a")));
-&test2("a",3,$q);
+test("a ab abc ac b y z",  join(" ",$q->members("a")));
+test2("a",3,$q);
 
-$q = &init();
+$q = init();
 $q->add("a",1,1, "ac","b","y","z");
-&test("a ab abc ac b y z",  join(" ",$q->members("a")));
-&test2("a",4,$q);
+test("a ab abc ac b y z",  join(" ",$q->members("a")));
+test2("a",4,$q);
 
-$q = &init();
+$q = init();
 $q->add("a",0,0, "b","y","z");
 $q->remove("a",0,1, "ab","y","yy");
-&test("a abc b z",       join(" ",$q->members("a")));
-&test2("a",5,$q);
+test("a abc b z",       join(" ",$q->members("a")));
+test2("a",5,$q);
 
-$q = &init();
+$q = init();
 $q->add("a",0,0, "b","y","z");
 $q->remove("a",1,1, "ab","y","yy");
-&test("a abc b z",       join(" ",$q->members("a")));
-&test2("a",6,$q);
+test("a abc b z",       join(" ",$q->members("a")));
+test2("a",6,$q);
 
-$q = &init();
+$q = init();
 $q->add("a",0,1, "ac");
-&test("a ab abc ac b",  join(" ",$q->members("a")));
-&test2("a",7,$q);
+test("a ab abc ac b",  join(" ",$q->members("a")));
+test2("a",7,$q);
 
-$q = &init();
+$q = init();
 $q->add("a",0,1, "bc");
-&test("a ab abc b bc",  join(" ",$q->members("a")));
-&test2("a",8,$q);
+test("a ab abc b bc",  join(" ",$q->members("a")));
+test2("a",8,$q);
+
+foreach $file (keys %clean) {
+  unlink $file  if (-f $file);
+}
+
+# Local Variables:
+# mode: cperl
+# indent-tabs-mode: nil
+# cperl-indent-level: 3
+# cperl-continued-statement-offset: 2
+# cperl-continued-brace-offset: 0
+# cperl-brace-offset: 0
+# cperl-brace-imaginary-offset: 0
+# cperl-label-offset: -2
+# End:
 
