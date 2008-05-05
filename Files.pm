@@ -1,5 +1,5 @@
 package Set::Files;
-# Copyright (c) 2001-2007 Sullivan Beck. All rights reserved.
+# Copyright (c) 2001-2008 Sullivan Beck. All rights reserved.
 # This program is free software; you can redistribute it and/or modify it
 # under the same terms as Perl itself.
 
@@ -11,10 +11,12 @@ package Set::Files;
 
 require 5.000;
 use strict;
+use warnings;
 use Carp;
 use IO::File;
 
 use vars qw($VERSION);
+$VERSION = "1.02";
 
 ########################################################################
 ########################################################################
@@ -179,22 +181,6 @@ The following methods are available:
 
 =over 4
 
-=cut
-
-########################################################################
-# HISTORY
-########################################################################
-
-# Version 1.00  sbeck  2002-04-01
-#    Initial release
-#
-# Version 1.01  sbeck  2007-12-17
-#    Cleaned up some code.
-
-$VERSION = "1.01";
-
-=pod
-
 =item VERSION
 
   use Set::Files;
@@ -231,7 +217,7 @@ my @Cache = qw(type owner dir opts ele);
 sub new {
   my($class,%opts) = @_;
 
-  my $self = Init(%opts);
+  my $self = _Init(%opts);
   bless $self, $class;
 
   return $self;
@@ -814,7 +800,7 @@ the cache, this method will fail.
 
 ########################################################################
 
-sub Init {
+sub _Init {
   my(%opts)=@_;
   my(%self) = ();
 
@@ -1146,7 +1132,7 @@ sub Init {
           croak "ERROR: invalid set to read: $set\n";
         }
 
-        $self{"set"}{$set} = ReadSet($set,$dir{$set},\@types,\@def_types,
+        $self{"set"}{$set} = _ReadSet($set,$dir{$set},\@types,\@def_types,
                                      $comment,$tagchars,
                                      $valid_ele,$valid_ele_re,$valid_ele_nre,
                                      $invalid_quiet);
@@ -1161,7 +1147,7 @@ sub Init {
 
     if ($read eq "files") {
       foreach my $set (keys %dir) {
-        $self{"set"}{$set} = ReadSet($set,$dir{$set},\@types,\@def_types,
+        $self{"set"}{$set} = _ReadSet($set,$dir{$set},\@types,\@def_types,
                                      $comment,$tagchars,
                                      $valid_ele,$valid_ele_re,$valid_ele_nre,
                                      $invalid_quiet);
@@ -1195,8 +1181,8 @@ sub Init {
     }
 
     while (1) {
-      my $flag1 = ExpandInclude($self{"set"});
-      my $flag2 = ExpandExclude($self{"set"});
+      my $flag1 = _ExpandInclude($self{"set"});
+      my $flag2 = _ExpandExclude($self{"set"});
       last  if (! $flag1  &&  ! $flag2);
     }
 
@@ -1220,7 +1206,7 @@ sub Init {
   return \%self;
 }
 
-sub ReadSet {
+sub _ReadSet {
   my($set,$dir,$types,$def_types,$comment,$tagchars,
      $valid_ele,$valid_ele_re,$valid_ele_nre,$invalid_quiet) = @_;
   my %set;
@@ -1233,14 +1219,14 @@ sub ReadSet {
   }
   my $uid = ( stat("$dir/$set") )[4];
   $set{"owner"} = $uid;
-  ReadSetFile($set,$in,\%set,$types,$def_types,$comment,
+  _ReadSetFile($set,$in,\%set,$types,$def_types,$comment,
               $tagchars,$valid_ele,$valid_ele_re,$valid_ele_nre,
               $invalid_quiet);
   $in->close;
   return \%set;
 }
 
-sub ReadSetFile {
+sub _ReadSetFile {
   my($set,$in,$self,$types,$def_types,$comment,$tagchars,
      $valid_ele,$valid_ele_re,$valid_ele_nre,$invalid_quiet)=@_;
   my %types = map { $_,1 } @$types;
@@ -1325,7 +1311,7 @@ sub ReadSetFile {
   }
 }
 
-sub ExpandInclude {
+sub _ExpandInclude {
   my($self)=@_;
   my $prog = 0;             # overall progress
 
@@ -1362,7 +1348,7 @@ sub ExpandInclude {
   return $prog;
 }
 
-sub ExpandExclude {
+sub _ExpandExclude {
   my($self)=@_;
   my $prog = 0;
 
@@ -1766,6 +1752,11 @@ the set files, etc., that set file maintainers can read for help.
 =head1 KNOWN PROBLEMS
 
 None at this point.
+
+=head1 LICENSE
+
+This script is free software; you can redistribute it and/or
+modify it under the same terms as Perl itself.
 
 =head1 AUTHOR
 
