@@ -1,54 +1,12 @@
 #!/usr/bin/perl
 
-use Set::Files;
-
-chdir "t"  if (-d "t");
-
-$ntest = 5;
-$itest = 1;
-
-print "Set::Files (Valid File)...\n";
-print "1..$ntest\n";
-
-sub test {
-  my($a,$b)=@_;
-  if ($a eq $b) {
-    print "ok $itest\n";
-  } else {
-    print "Expected: $a\n";
-    print "Got     : $b\n";
-    print "not ok $itest\n";
-  }
-  $itest++;
+BEGIN {
+  use Test::Inter;
+  $t = new Test::Inter 'Valid File';
 }
 
-$q = new Set::Files("path"          => "dir4",
-                    "invalid_quiet" => 1,
-                    "valid_file"    => '^a'
-                   );
-
-test("a1 a2",           join(" ",$q->list_sets));
-
-$q = new Set::Files("path"          => "dir4",
-                    "invalid_quiet" => 1,
-                    "valid_file"    => '2$'
-                   );
-
-test("a2 b2",           join(" ",$q->list_sets));
-
-$q = new Set::Files("path"          => "dir4",
-                    "invalid_quiet" => 1,
-                    "valid_file"    => '!^a'
-                   );
-
-test("b1 b2",           join(" ",$q->list_sets));
-
-$q = new Set::Files("path"          => "dir4",
-                    "invalid_quiet" => 1,
-                    "valid_file"    => '!2$'
-                   );
-
-test("a1 b1",           join(" ",$q->list_sets));
+BEGIN { $t->use_ok('Set::Files'); }
+$testdir = $t->testdir();
 
 sub valid_file {
   my($dir,$file) = @_;
@@ -56,12 +14,20 @@ sub valid_file {
   return 0;
 }
 
-$q = new Set::Files("path"          => "dir4",
-                    "invalid_quiet" => 1,
-                    "valid_file"    => \&valid_file
-                   );
+sub test {
+   my($valid) = @_;
 
-test("a1 b2",           join(" ",$q->list_sets));
+   my $q = new Set::Files("path"          => "$testdir/dir4",
+                          "invalid_quiet" => 1,
+                          "valid_file"    => $valid
+                         );
+   $q->list_sets();
+}
+
+$t->tests(func     => \&test,
+          tests    => [ '^a',        '2$',        '!^a',       '!2$',       \&valid_file],
+          expected => [ [qw(a1 a2)], [qw(a2 b2)], [qw(b1 b2)], [qw(a1 b1)], [qw(a1 b2)] ]);
+$t->done_testing();
 
 # Local Variables:
 # mode: cperl

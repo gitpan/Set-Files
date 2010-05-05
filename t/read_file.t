@@ -1,52 +1,38 @@
 #!/usr/bin/perl
 
-use Set::Files;
-
-chdir "t"  if (-d "t");
-
-$ntest = 4;
-$itest = 1;
-
-print "Set::Files (Read File)...\n";
-print "1..$ntest\n";
-
-sub test {
-  my($a,$b)=@_;
-  if ($a eq $b) {
-    print "ok $itest\n";
-  } else {
-    print "Expected: $a\n";
-    print "Got     : $b\n";
-    print "not ok $itest\n";
-  }
-  $itest++;
+BEGIN {
+  use Test::Inter;
+  $t = new Test::Inter 'Read File';
 }
 
-$q = new Set::Files("path"          => "dir5"
-                   );
+BEGIN { $t->use_ok('Set::Files'); }
+my $testdir = $t->testdir();
 
-test("a b c",           join(" ",$q->list_sets));
+sub test1 {
+   my $q = new Set::Files("path" => "$testdir/dir5");
+   $q->list_sets();
+}
 
-$q = new Set::Files("path"          => "dir5",
-                    "read"          => "file",
-                    "set"           => "a"
-                   );
+$t->is(\&test1,[],['a','b','c']);
 
-test("a",               join(" ",$q->list_sets));
+sub test2 {
+   my($set) = @_;
 
-$q = new Set::Files("path"          => "dir5",
-                    "read"          => "file",
-                    "set"           => "b"
-                   );
+   my $q = new Set::Files("path" => "$testdir/dir5",
+                          "read" => "file",
+                          "set"  => $set,
+                         );
+   $q->list_sets();
+}
 
-test("a b",             join(" ",$q->list_sets));
+$t->tests(func     => \&test2,
+          tests    => "a  => a
 
-$q = new Set::Files("path"          => "dir5",
-                    "read"          => "file",
-                    "set"           => "c"
-                   );
+                       b  => a b
 
-test("a b c",           join(" ",$q->list_sets));
+                       c  => a b c
+                      ");
+$t->done_testing();
 
 # Local Variables:
 # mode: cperl

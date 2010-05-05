@@ -1,62 +1,44 @@
 #!/usr/bin/perl
 
-use Set::Files;
-
-chdir "t"  if (-d "t");
-
-$ntest = 13;
-$itest = 1;
-
-print "Set::Files (Omit)...\n";
-print "1..$ntest\n";
-
-$in  = new IO::File;
-$out = new IO::File;
-
-sub test {
-  my($a,$b)=@_;
-  if ($a eq $b) {
-    print "ok $itest\n";
-  } else {
-    print "Expected: $a\n";
-    print "Got     : $b\n";
-    print "not ok $itest\n";
-  }
-  $itest++;
-}
-sub init {
-  $in->open("dir2a/a.orig");
-  $out->open("> dir2a/a");
-  @in = <$in>;
-  foreach $line (@in) {
-    print $out $line;
-  }
-  $in->close;
-  $out->close;
-
-  $q = new Set::Files("path"          => ["dir2a","dir2b"],
-                      "types"         => ["type1","type2"],
-                      "invalid_quiet" => 1,
-                      "valid_file"    => '!(orig|out)$',
-                      "default_types" => "none"
-                     );
-  return $q;
+BEGIN {
+  use Test::Inter;
+  $t = new Test::Inter 'Omit';
 }
 
-$q = init();
-test("a b c",           join(" ",$q->list_sets));
-test("a b",             join(" ",$q->list_sets("type1")));
-test("a ab abc b",      join(" ",$q->members("a")));
-test("ab abc b bc",     join(" ",$q->members("b")));
-test("1",               $q->is_member("a","ab"));
-test("0",               $q->is_member("a","c"));
-test("type1 type2",     join(" ",$q->list_types));
-test("type1 type2",     join(" ",$q->list_types("a")));
-test("type1",           join(" ",$q->list_types("b")));
-test("dir2a",           join(" ",$q->dir("a")));
-test("dir2b",           join(" ",$q->dir("c")));
-test("1",               join(" ",$q->opts("a","a1")));
-test("vala2",           join(" ",$q->opts("a","a2")));
+BEGIN { $t->use_ok('Set::Files'); }
+my $testdir = $t->testdir();
+
+$q = new Set::Files("path"          => ["$testdir/dir2a","$testdir/dir2b"],
+                    "types"         => ["type1","type2"],
+                    "default_types" => "none"
+                   );
+
+@tests = ( [$q->list_sets],            [qw(a b c)],
+           [$q->list_sets("type1")],   [qw(a b)],
+           [$q->members("a")],         [qw(a ab abc b)],
+           [$q->members("b")],         [qw(ab abc b bc)],
+           [$q->is_member("a","ab")],  [1],
+           [$q->is_member("a","c")],   [0],
+           [$q->list_types()],         [qw(type1 type2)],
+           [$q->list_types("a")],      [qw(type1 type2)],
+           [$q->list_types("b")],      [qw(type1)],
+           [$q->dir("a")],             ["$testdir/dir2a"],
+           [$q->dir("c")],             ["$testdir/dir2b"],
+           [$q->opts("a","a1")],       [1],
+           [$q->opts("a","a2")],       [qw(vala2)]
+         );
+
+@results  = ();
+@expected = ();
+while (@tests) {
+   push(@results,shift(@tests));
+   push(@expected,shift(@tests));
+}
+
+$t->tests(tests    => [ @results ],
+          expected => [ @expected ]);
+
+$t->done_testing();
 
 # Local Variables:
 # mode: cperl

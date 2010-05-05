@@ -1,5 +1,10 @@
 Build.PL
+examples/dir/a
+examples/dir/b
+examples/dir/c
+examples/test.pl
 HISTORY
+INSTALL
 lib/Set/Files.pm
 lib/Set/Files.pod
 LICENSE
@@ -11,17 +16,7 @@ t/cache.t
 t/dir1a/a
 t/dir1a/b
 t/dir1b/c
-t/dir2a/.set_files.template
 t/dir2a/a
-t/dir2a/a.1.out
-t/dir2a/a.2.out
-t/dir2a/a.3.out
-t/dir2a/a.4.out
-t/dir2a/a.5.out
-t/dir2a/a.6.out
-t/dir2a/a.7.out
-t/dir2a/a.8.out
-t/dir2a/a.orig
 t/dir2a/b
 t/dir2b/c
 t/dir3/a
@@ -37,6 +32,7 @@ t/pod.t
 t/pod_coverage.t
 t/read_file.t
 t/runtests
+t/runtests.bat
 t/std.t
 t/tagchar.t
 t/valid_ele.t

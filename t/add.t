@@ -1,121 +1,73 @@
 #!/usr/bin/perl
 
-use Set::Files;
-
-chdir "t"  if (-d "t");
-
-$ntest = 16;
-$itest = 1;
-
-print "Set::Files (Add/Remove)...\n";
-print "1..$ntest\n";
-
-$in = new IO::File;
-$out = new IO::File;
-
-sub test {
-  my($a,$b)=@_;
-  if ($a eq $b) {
-    print "ok $itest\n";
-  } else {
-    print "Expected: $a\n";
-    print "Got     : $b\n";
-    print "not ok $itest\n";
-  }
-  $itest++;
+BEGIN {
+  use Test::Inter;
+  $t = new Test::Inter '';
 }
 
-sub test2 {
-  my($set,$num,$q)=@_;
-  my $dir = $q->dir($set);
-
-  $clean{"$dir/.set_files.diff.$set.$num"} = 1;
-
-  my $diff = "$dir/.set_files.diff.$set.$num";
-  system("diff $dir/$set.$num.out $dir/$set > $diff");
-  if (-z "$diff") {
-    print "ok $itest\n";
-  } else {
-    print "Diff    : $set,$num\n";
-    print "not ok $itest\n";
-  }
-  $itest++;
-}
+BEGIN { $t->use_ok('Set::Files'); }
+$testdir = $t->testdir();
 
 sub init {
-
-  $in->open("dir2a/a.orig");
-  $out->open("> dir2a/a");
-  @in = <$in>;
-  foreach $line (@in) {
-    print $out $line;
-  }
-  $in->close;
-  $out->close;
-
-  $clean{"dir2a/a"} = 1;
-  $clean{"dir2a/.set_files.a"} = 1;
-  $clean{"dir2a/.set_files.a.old"} = 1;
-
-  $q = new Set::Files("path"          => ["dir2a","dir2b"],
-                      "types"         => ["type1","type2"],
-                      "invalid_quiet" => 1,
-                      "valid_file"    => '!(orig|out)$',
-                      "default_types" => "none"
-                     );
-  return $q;
-}
-sub term {
-  unlink "dir2a/a";
+   $q = new Set::Files("path"          => ["$testdir/dir2a","$testdir/dir2b"],
+                       "types"         => ["type1","type2"],
+                       "invalid_quiet" => 1,
+                       "default_types" => "none"
+                      );
+   return;
 }
 
-%clean = ();
+@tests = (
+          [init(),
+           $q->members("a")],               [qw(a ab abc b)],
 
-$q = init();
-$q->add("a",0,1, "b","y","z");
-test("a ab abc b y z",  join(" ",$q->members("a")));
-test2("a",1,$q);
+          [init(),
+           $q->add("a",0,0, "b","y","z"),
+           $q->members("a")],               [2,qw(a ab abc b y z)],
 
-$q = init();
-$q->add("a",1,1, "b","y","z");
-test("a ab abc b y z",  join(" ",$q->members("a")));
-test2("a",2,$q);
+          [init(),
+           $q->add("a",1,0, "b","y","z"),
+           $q->members("a")],               [3,qw(a ab abc b y z)],
 
-$q = init();
-$q->add("a",0,1, "ac","b","y","z");
-test("a ab abc ac b y z",  join(" ",$q->members("a")));
-test2("a",3,$q);
+          [init(),
+           $q->add("a",0,0, "ac","b","y","z"),
+           $q->members("a")],               [3,qw(a ab abc ac b y z)],
 
-$q = init();
-$q->add("a",1,1, "ac","b","y","z");
-test("a ab abc ac b y z",  join(" ",$q->members("a")));
-test2("a",4,$q);
+          [init(),
+           $q->add("a",1,0, "ac","b","y","z"),
+           $q->members("a")],               [4,qw(a ab abc ac b y z)],
 
-$q = init();
-$q->add("a",0,0, "b","y","z");
-$q->remove("a",0,1, "ab","y","yy");
-test("a abc b z",       join(" ",$q->members("a")));
-test2("a",5,$q);
+          [init(),
+           $q->add("a",0,0, "b","y","z"),
+           $q->remove("a",0,0, "ab","y","yy"),
+           $q->members("a")],               [2,2,qw(a abc b z)],
 
-$q = init();
-$q->add("a",0,0, "b","y","z");
-$q->remove("a",1,1, "ab","y","yy");
-test("a abc b z",       join(" ",$q->members("a")));
-test2("a",6,$q);
+          [init(),
+           $q->add("a",0,0, "b","y","z"),
+           $q->remove("a",1,0, "ab","y","yy"),
+           $q->members("a")],               [2,3,qw(a abc b z)],
 
-$q = init();
-$q->add("a",0,1, "ac");
-test("a ab abc ac b",  join(" ",$q->members("a")));
-test2("a",7,$q);
+          [init(),
+           $q->add("a",0,0, "ac"),
+           $q->members("a")],               [1,qw(a ab abc ac b)],
 
-$q = init();
-$q->add("a",0,1, "bc");
-test("a ab abc b bc",  join(" ",$q->members("a")));
-test2("a",8,$q);
+          [init(),
+           $q->add("a",0,0, "bc"),
+           $q->members("a")],               [1,qw(a ab abc b bc)]
+         );
 
-foreach $file (keys %clean) {
-  unlink $file  if (-f $file);
+@results  = ();
+@expected = ();
+while (@tests) {
+   push(@results,shift(@tests));
+   push(@expected,shift(@tests));
 }
+
+$t->tests(tests    => [ @results ],
+          expected => [ @expected ]);
+
+$t->done_testing();
+
 
 # Local Variables:
 # mode: cperl
