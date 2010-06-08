@@ -23,5 +23,7 @@ Version 1.05  2010-05-05
    Changed test suite to Test::Inter
    Better handling of the scratch directory to work better on windows
 
-Version 1.06
+Version 1.06  2010-06-08
+   Changed Build.PL/Makefile.PL so the test won't fail.
 
+Version 1.07

@@ -16,13 +16,12 @@ my %build_mods = (
 
 my $build = Module::Build->new(
         license            => 'perl',
-        dist_version       => '1.05',
+        dist_version       => '1.06',
         dist_author        => 'Sullivan Beck <sbeck@cpan.org>',
         module_name        => 'Set::Files',
         dist_abstract      => 'routines to work with files, each definining a single set',
         requires           => \%requires,
-        build_requires     => {},
-        build_recommends   => \%build_mods,
+        build_requires     => \%build_mods,
         sign               => 1,
 );
 

@@ -14,7 +14,7 @@ my %requires = (
 
 WriteMakefile(
         NAME             => 'Set::Files',
-        VERSION          => '1.05',
+        VERSION          => '1.06',
         ($] >= 5.000
         ? (ABSTRACT=>'routines to work with files, each definining a single set',
            AUTHOR  =>'Sullivan Beck (sbeck@cpan.org)')
